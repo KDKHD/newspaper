@@ -15,7 +15,6 @@ import traceback
 import urllib.parse
 
 import requests
-from PIL import Image, ImageFile
 
 from . import urls
 
@@ -27,23 +26,26 @@ minimal_area = 5000
 
 
 def image_to_str(image):
-    s = io.StringIO()
-    image.save(s, image.format)
-    s.seek(0)
-    return s.read()
+    raise Exception('Not implemented')
+    # s = io.StringIO()
+    # image.save(s, image.format)
+    # s.seek(0)
+    # return s.read()
 
 
 def str_to_image(s):
-    s = io.StringIO(s)
-    s.seek(0)
-    image = Image.open(s)
-    return image
+    raise Exception('Not implemented')
+    # s = io.StringIO(s)
+    # s.seek(0)
+    # image = Image.open(s)
+    # return image
 
 
 def prepare_image(image):
-    image = square_image(image)
-    image.thumbnail(thumbnail_size, Image.ANTIALIAS)
-    return image
+    raise Exception('Not implemented')
+    # image = square_image(image)
+    # image.thumbnail(thumbnail_size, Image.ANTIALIAS)
+    # return image
 
 
 def image_entropy(img):
@@ -84,83 +86,84 @@ def clean_url(url):
 
 
 def fetch_url(url, useragent, referer=None, retries=1, dimension=False):
-    cur_try = 0
-    nothing = None if dimension else (None, None)
-    url = clean_url(url)
-    if not url.startswith(('http://', 'https://')):
-        return nothing
+    raise Exception('Not implemented')
+    # cur_try = 0
+    # nothing = None if dimension else (None, None)
+    # url = clean_url(url)
+    # if not url.startswith(('http://', 'https://')):
+    #     return nothing
 
-    response = None
-    while True:
-        try:
-            response = requests.get(url, stream=True, timeout=5, headers={
-                'User-Agent': useragent,
-                'Referer': referer,
-            })
+    # response = None
+    # while True:
+    #     try:
+    #         response = requests.get(url, stream=True, timeout=5, headers={
+    #             'User-Agent': useragent,
+    #             'Referer': referer,
+    #         })
 
-            # if we only need the dimension of the image, we may not
-            # need to download the entire thing
-            if dimension:
-                content = response.raw.read(chunk_size)
-            else:
-                content = response.raw.read()
+    #         # if we only need the dimension of the image, we may not
+    #         # need to download the entire thing
+    #         if dimension:
+    #             content = response.raw.read(chunk_size)
+    #         else:
+    #             content = response.raw.read()
 
-            content_type = response.headers.get('Content-Type')
+    #         content_type = response.headers.get('Content-Type')
 
-            if not content_type:
-                return nothing
+    #         if not content_type:
+    #             return nothing
 
-            if 'image' in content_type:
-                p = ImageFile.Parser()
-                new_data = content
-                while not p.image and new_data:
-                    try:
-                        p.feed(new_data)
-                    except IOError:
-                        traceback.print_exc()
-                        p = None
-                        break
-                    except ValueError:
-                        traceback.print_exc()
-                        p = None
-                        break
-                    except Exception as e:
-                        # For some favicon.ico images, the image is so small
-                        # that our PIL feed() method fails a length test.
-                        is_favicon = (urls.url_to_filetype(url) == 'ico')
-                        if is_favicon:
-                            pass
-                        else:
-                            raise e
-                        p = None
-                        break
-                    new_data = response.raw.read(chunk_size)
-                    content += new_data
+    #         if 'image' in content_type:
+    #             p = ImageFile.Parser()
+    #             new_data = content
+    #             while not p.image and new_data:
+    #                 try:
+    #                     p.feed(new_data)
+    #                 except IOError:
+    #                     traceback.print_exc()
+    #                     p = None
+    #                     break
+    #                 except ValueError:
+    #                     traceback.print_exc()
+    #                     p = None
+    #                     break
+    #                 except Exception as e:
+    #                     # For some favicon.ico images, the image is so small
+    #                     # that our PIL feed() method fails a length test.
+    #                     is_favicon = (urls.url_to_filetype(url) == 'ico')
+    #                     if is_favicon:
+    #                         pass
+    #                     else:
+    #                         raise e
+    #                     p = None
+    #                     break
+    #                 new_data = response.raw.read(chunk_size)
+    #                 content += new_data
 
-                if p is None:
-                    return nothing
-                # return the size, or return the data
-                if dimension and p.image:
-                    return p.image.size
-                elif dimension:
-                    return nothing
-            elif dimension:
-                # expected an image, but didn't get one
-                return nothing
+    #             if p is None:
+    #                 return nothing
+    #             # return the size, or return the data
+    #             if dimension and p.image:
+    #                 return p.image.size
+    #             elif dimension:
+    #                 return nothing
+    #         elif dimension:
+    #             # expected an image, but didn't get one
+    #             return nothing
 
-            return content_type, content
+    #         return content_type, content
 
-        except requests.exceptions.RequestException as e:
-            cur_try += 1
-            if cur_try >= retries:
-                log.debug('error while fetching: %s refer: %s' %
-                          (url, referer))
-                return nothing
-        finally:
-            if response is not None:
-                response.raw.close()
-                if response.raw._connection:
-                    response.raw._connection.close()
+    #     except requests.exceptions.RequestException as e:
+    #         cur_try += 1
+    #         if cur_try >= retries:
+    #             log.debug('error while fetching: %s refer: %s' %
+    #                       (url, referer))
+    #             return nothing
+    #     finally:
+    #         if response is not None:
+    #             response.raw.close()
+    #             if response.raw._connection:
+    #                 response.raw._connection.close()
 
 
 def fetch_image_dimension(url, useragent, referer=None, retries=1):
